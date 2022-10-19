@@ -24,14 +24,16 @@ db_conn = engine.connect()
 
 #assignment fetch button
 @app.get('/fetch/assignment')
-async def index_assignment(request: Assignment):
+async def index_assignment(auditor: str, audit_leader: str,audit_vertical:str, region:str, month_of_import:str, year_of_import:int):
     query=assignment.select()#.fatchall()
     db_data = db_conn.execute(query.where(
-        (assignment.columns.audit_vertical == request.audit_vertical) & 
-        (assignment.columns.region == request.region) &
-        (assignment.columns.month_of_import == request.month_of_import) &
-        (assignment.columns.year_of_import == request.year_of_import))).fetchone()
-    #If the record doesn't exist it'll return null
+        (assignment.columns.auditor == auditor) &
+        (assignment.columns.audit_leader == audit_leader) &
+        (assignment.columns.audit_vertical == audit_vertical) & 
+        (assignment.columns.region == region) &
+        (assignment.columns.month_of_import == month_of_import) &
+        (assignment.columns.year_of_import == year_of_import))).fetchone()
+    #If the record doesn't exist it'll return error 404 not found
     return {
         db_data
     }
