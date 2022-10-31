@@ -1,11 +1,11 @@
-from sqlalchemy import create_engine, MetaData
-from sqlalchemy import Table,Column
-from sqlalchemy.sql.sqltypes import Integer,String,Float
+# from sqlalchemy import create_engine, MetaData
+# from sqlalchemy import Table,Column
+# from sqlalchemy.sql.sqltypes import Integer,String,Float
 from pydantic import BaseModel
 
-engine = create_engine('mysql+pymysql://spitzer_admin:spitzer_admin@spitzer-db.clxcbiehe0ph.us-east-1.rds.amazonaws.com:3306/spitzer')
-meta = MetaData()
-db_conn = engine.connect()
+# engine = create_engine('mysql+pymysql://spitzer_admin:spitzer_admin@spitzer-db.clxcbiehe0ph.us-east-1.rds.amazonaws.com:3306/spitzer')
+# meta = MetaData()
+# db_conn = engine.connect()
 
 class Assignment(BaseModel):
     audit_vertical: str
@@ -26,7 +26,7 @@ class Assignment(BaseModel):
     name_of_other_business_verticals: str | None = None
 
 
-class Audit(BaseModel):
+class Audit_detail(BaseModel):
     audit_vertical: str
     region: str
     month_of_import: str
@@ -62,7 +62,7 @@ class Audit(BaseModel):
     beagle_error_sim_details: str | None = None
     
 
-class Quality_audit(BaseModel):
+class Quality_assurance(BaseModel):
     audit_vertical: str
     region: str
     month_of_import: str

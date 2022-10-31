@@ -1,11 +1,11 @@
 #modules
-from types import NoneType
+# from types import NoneType
 from sqlalchemy import create_engine, MetaData
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from config import assignment,audit,quality_audit
 from sqlalchemy import insert, update
-from pydantic_config import Assignment, Audit,Quality_audit
+from pydantic_config import Assignment, Audit_detail,Quality_assurance
 
 app=FastAPI()
 
@@ -40,33 +40,34 @@ async def index_assignment(auditor: str, audit_leader: str,audit_vertical:str, r
 
 #audit fetch button
 @app.get('/fetch/audit')
-async def index_audit(request: Audit):
+async def index_audit(audit_vertical:str, region:str, month_of_import:str, year_of_import:int, auditor:str):
     query=audit.select()#.fatchall()
     db_data = db_conn.execute(query.where(
-        (audit.columns.audit_vertical == request.audit_vertical) & 
-        (audit.columns.region == request.region) &
-        (audit.columns.month_of_import == request.month_of_import) &
-        (audit.columns.year_of_import == request.year_of_import))).fetchone()
-    #If the record doesn't exist it'll return null
+        (audit.columns.audit_vertical == audit_vertical) & 
+        (audit.columns.region == region) &
+        (audit.columns.month_of_import == month_of_import) &
+        (audit.columns.year_of_import == year_of_import) &
+        (audit.columns.auditor == auditor))).fetchone()
+    #If the record doesn't exist it'll return error 404 not found
     return {
         db_data
     }
 
 #quality_audit fetch button
 @app.get('/fetch/quality_audit')
-async def index_quality_audit(request: Quality_audit):
+async def index_quality_audit(audit_vertical:str, region:str, month_of_import:str, year_of_import:int, auditor:str, quality_auditor:str):
     query=quality_audit.select()#.fatchall()
     db_data = db_conn.execute(query.where(
-        (quality_audit.columns.audit_vertical == request.audit_vertical) & 
-        (quality_audit.columns.region == request.region) &
-        (quality_audit.columns.month_of_import == request.month_of_import) &
-        (quality_audit.columns.year_of_import == request.year_of_import))).fetchone()
-    #If the record doesn't exist it'll return null
+        (quality_audit.columns.audit_vertical == audit_vertical) &
+        (quality_audit.columns.region == region) &
+        (quality_audit.columns.month_of_import == month_of_import) &
+        (quality_audit.columns.year_of_import == year_of_import) &
+        (quality_audit.columns.auditor == auditor) &
+        (quality_audit.columns.quality_auditor == quality_auditor))).fetchone()
+    #If the record doesn't exist it'll return error 404 not found
     return {
         db_data
     }
-
-
 
 #assignment submit button
 @app.post('/submit/assignment')
@@ -100,10 +101,10 @@ async def submit_assignment(request: Assignment):
 
 #audit submit button
 @app.post('/submit/audit')
-async def submit_audit(request: Audit):
+async def submit_audit(request: Audit_detail):
 
     #query
-    query = insert(audit).values(
+    query = audit.insert().values(
         audit_vertical= request.audit_vertical, 
         region= request.region,
         month_of_import=request.month_of_import,
@@ -147,10 +148,10 @@ async def submit_audit(request: Audit):
 
 #quality_audit submit button
 @app.post('/submit/quality_audit')
-async def submit_quality_audit(request: Quality_audit):
+async def submit_quality_audit(request: Quality_assurance):
     
     #query
-    query = insert(quality_audit).values(
+    query = quality_audit.insert().values(
         audit_vertical= request.audit_vertical, 
         region= request.region,
         month_of_import= request.month_of_import,
@@ -172,8 +173,6 @@ async def submit_quality_audit(request: Quality_audit):
     return {
         "Insert successfull"
     }
-
-
 
 @app.put('/update/assignment')
 async def update_row(request: Assignment):
@@ -199,6 +198,8 @@ async def update_row(request: Assignment):
     
     #query execution
     db_conn.execute(query.where(
+        (assignment.columns.auditor == request.auditor) &
+        (assignment.columns.audit_leader == request.audit_leader) &
         (assignment.columns.audit_vertical == request.audit_vertical) & 
         (assignment.columns.region == request.region) &
         (assignment.columns.month_of_import == request.month_of_import) &
@@ -209,7 +210,7 @@ async def update_row(request: Assignment):
     }
 
 @app.put('/update/audit')
-async def update_row(request: Audit):
+async def update_row(request: Audit_detail):
     
     #query
     query = update(audit).values(
@@ -249,17 +250,18 @@ async def update_row(request: Audit):
     
     #query execution
     db_conn.execute(query.where(
-        (assignment.columns.audit_vertical == request.audit_vertical) & 
-        (assignment.columns.region == request.region) &
-        (assignment.columns.month_of_import == request.month_of_import) &
-        (assignment.columns.year_of_import == request.year_of_import)))
+        (audit.columns.audit_vertical == request.audit_vertical) & 
+        (audit.columns.region == request.region) &
+        (audit.columns.month_of_import == request.month_of_import) &
+        (audit.columns.year_of_import == request.year_of_import) &
+        (audit.columns.auditor == request.auditor)))
     #data=db_conn.execute(assignment.select()).fetchall()
     return {
         "Update successfull"
     }
 
 @app.put('/update/quality_audit')
-async def update_row(request: Quality_audit):
+async def update_row(request: Quality_assurance):
     
     #query
     query = update(quality_audit).values(
@@ -280,10 +282,12 @@ async def update_row(request: Quality_audit):
     
     #query execution
     db_conn.execute(query.where(
-        (assignment.columns.audit_vertical == request.audit_vertical) & 
-        (assignment.columns.region == request.region) &
-        (assignment.columns.month_of_import == request.month_of_import) &
-        (assignment.columns.year_of_import == request.year_of_import)))
+        (quality_audit.columns.audit_vertical == request.audit_vertical) &
+        (quality_audit.columns.region == request.region) &
+        (quality_audit.columns.month_of_import == request.month_of_import) &
+        (quality_audit.columns.year_of_import == request.year_of_import) &
+        (quality_audit.columns.auditor == request.auditor) &
+        (quality_audit.columns.quality_auditor == request.quality_auditor)))
     #data=db_conn.execute(assignment.select()).fetchall()
     return {
         "Update successfull"

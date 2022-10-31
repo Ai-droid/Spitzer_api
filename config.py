@@ -25,7 +25,7 @@ assignment=Table('assignment',meta,
     Column('no_of_asins_to_be_audited', Integer),
 )
 
-audit=Table('audit',meta,
+audit=Table('audit_detail',meta,
     Column('audit_vertical', String(255)),
     Column('region', String(255)),
     Column('month_of_import', String(255)),
@@ -61,7 +61,7 @@ audit=Table('audit',meta,
     Column('status',String(255)),
 )
 
-quality_audit=Table('quality_audit',meta,
+quality_audit=Table('quality_assurance',meta,
     Column('audit_vertical', String(255)),
     Column('region', String(255)),
     Column('month_of_import', String(255)),
